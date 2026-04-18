@@ -1,0 +1,22 @@
+# Local Flutter SDK (optional checkout for CI/dev without system Flutter)
+.flutter-sdk/
+
+# Dart / Flutter
+**/doc/api/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Pods/
+**/macos/Flutter/ephemeral/
+**/linux/flutter/ephemeral/
+**/windows/flutter/ephemeral/
+
+**/build/
+**/.dart_tool/
+**/.packages
+
+# IDE
+.idea/
+*.iml
+*.swp
+.DS_Store
