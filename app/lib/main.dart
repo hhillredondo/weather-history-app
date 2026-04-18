@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'screens/home_screen.dart';
+import 'screens/app_shell.dart';
+import 'state/app_state.dart';
 
-void main() {
-  runApp(const WeatherHistoryApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppState.instance.load();
+  runApp(
+    ChangeNotifierProvider<AppState>.value(
+      value: AppState.instance,
+      child: const WeatherHistoryApp(),
+    ),
+  );
 }
 
 class WeatherHistoryApp extends StatelessWidget {
@@ -27,7 +36,7 @@ class WeatherHistoryApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const AppShell(),
     );
   }
 }

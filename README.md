@@ -42,8 +42,12 @@ After any install, run `flutter doctor` and install anything it asks for (Chrome
 
 ## Current behaviour
 
-- **15 days** of **daily** summaries ending **yesterday** (today is excluded), default **London** coordinates.
-- **No in-app rate limiting** — we assume you will monitor Open-Meteo usage. If you outgrow the free tier, Open-Meteo’s paid plans add commercial use and higher limits; the cheaper tier may not include historical endpoints, so upgrading for **archive/historical** data can jump to a higher price band (check [Pricing](https://open-meteo.com/en/pricing) for current details).
+- **Home**: **15 days** of **daily** summaries ending **yesterday**; uses your **favourite** saved place or default **London**.
+- **Calendar**: pick any past day — shows **15 days** (**±7** around that day).
+- **Locations**: search ([Open-Meteo geocoding](https://open-meteo.com/en/docs/geocoding-api)), save places, tap a row to set **favourite** (star).
+- **Settings**: **°C/°F**, wind (**km/h**, **mph**, **m/s**), precipitation (**mm** / **in**). Preferences persist locally (`shared_preferences`).
+- **AWS**: CloudFormation template at [`infrastructure/cloudformation/template.yaml`](infrastructure/cloudformation/template.yaml) provisions **Cognito** (email sign-in), **DynamoDB** (app data), **HTTP API** + **Lambda** stub — deploy when ready (`Environment` = `dev` or `prod`). The Flutter app does not call this API yet.
+- **No in-app rate limiting** for Open-Meteo — monitor usage; see [Pricing](https://open-meteo.com/en/pricing) if you need commercial or higher limits.
 
 ## Licence
 
