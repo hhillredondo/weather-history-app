@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../services/backend_api.dart';
 import '../services/open_meteo_geocoding.dart';
 import '../state/app_state.dart';
+import '../state/auth_state.dart';
 
 class LocationsScreen extends StatefulWidget {
   const LocationsScreen({super.key});
@@ -45,8 +47,24 @@ class _LocationsScreenState extends State<LocationsScreen> {
   Future<void> _addHit(GeocodingHit hit) async {
     final app = AppState.instance;
     final id = app.newId();
-    await app.addLocation(hit.toSavedLocation(id));
+    final loc = hit.toSavedLocation(id);
+    await app.addLocation(loc);
     await app.setFavourite(id);
+    if (!mounted) return;
+    final auth = context.read<AuthState>();
+    if (auth.isSignedIn) {
+      try {
+        final api = BackendApi(auth);
+        await api.upsertLocation(loc);
+        await api.putFavourite(id);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cloud sync: $e')),
+          );
+        }
+      }
+    }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Saved & set as favourite: ${hit.name}')),
@@ -60,8 +78,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Locations')),
-      body: Consumer<AppState>(
-        builder: (context, app, _) {
+      body: Consumer2<AppState, AuthState>(
+        builder: (context, app, auth, _) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -153,7 +171,21 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                   ? Theme.of(context).colorScheme.primary
                                   : null,
                             ),
-                            onTap: () => app.setFavourite(loc.id),
+                            onTap: () async {
+                              await app.setFavourite(loc.id);
+                              if (!context.mounted) return;
+                              if (auth.isSignedIn) {
+                                try {
+                                  await BackendApi(auth).putFavourite(loc.id);
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Cloud sync: $e')),
+                                    );
+                                  }
+                                }
+                              }
+                            },
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
                               onPressed: () async {
@@ -175,7 +207,20 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                     ],
                                   ),
                                 );
-                                if (ok == true) await app.removeLocation(loc.id);
+                                if (ok == true) {
+                                  await app.removeLocation(loc.id);
+                                  if (context.mounted && auth.isSignedIn) {
+                                    try {
+                                      await BackendApi(auth).deleteLocation(loc.id);
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Cloud delete: $e')),
+                                        );
+                                      }
+                                    }
+                                  }
+                                }
                               },
                             ),
                           );

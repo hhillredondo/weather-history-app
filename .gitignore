@@ -20,3 +20,8 @@
 *.iml
 *.swp
 .DS_Store
+
+# Lambda bundle (build locally)
+infrastructure/lambda/api/node_modules/
+infrastructure/lambda/api/dist/
+infrastructure/lambda/api/function.zip

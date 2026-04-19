@@ -66,6 +66,29 @@ class AppState extends ChangeNotifier {
     await prefs.setString(_kSettings, json.encode(value.toJson()));
   }
 
+  /// Replace local state from cloud sync (still persisted locally).
+  Future<void> replaceFromCloud({
+    required AppSettings newSettings,
+    required List<SavedLocation> newLocations,
+    String? favouriteId,
+  }) async {
+    settings = newSettings;
+    locations = newLocations;
+    favouriteLocationId = favouriteId;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kSettings, json.encode(settings.toJson()));
+    await prefs.setString(
+      _kLocations,
+      json.encode(locations.map((e) => e.toJson()).toList()),
+    );
+    if (favouriteId == null) {
+      await prefs.remove(_kFavourite);
+    } else {
+      await prefs.setString(_kFavourite, favouriteId);
+    }
+  }
+
   Future<void> addLocation(SavedLocation loc) async {
     locations = [...locations, loc];
     notifyListeners();

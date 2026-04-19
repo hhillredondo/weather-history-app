@@ -3,13 +3,19 @@ import 'package:provider/provider.dart';
 
 import 'screens/app_shell.dart';
 import 'state/app_state.dart';
+import 'state/auth_state.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppState.instance.load();
+  final auth = AuthState();
+  await auth.load();
   runApp(
-    ChangeNotifierProvider<AppState>.value(
-      value: AppState.instance,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AppState>.value(value: AppState.instance),
+        ChangeNotifierProvider<AuthState>.value(value: auth),
+      ],
       child: const WeatherHistoryApp(),
     ),
   );

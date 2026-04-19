@@ -46,7 +46,45 @@ After any install, run `flutter doctor` and install anything it asks for (Chrome
 - **Calendar**: pick any past day — shows **15 days** (**±7** around that day).
 - **Locations**: search ([Open-Meteo geocoding](https://open-meteo.com/en/docs/geocoding-api)), save places, tap a row to set **favourite** (star).
 - **Settings**: **°C/°F**, wind (**km/h**, **mph**, **m/s**), precipitation (**mm** / **in**). Preferences persist locally (`shared_preferences`).
-- **AWS**: CloudFormation template at [`infrastructure/cloudformation/template.yaml`](infrastructure/cloudformation/template.yaml) provisions **Cognito** (email sign-in), **DynamoDB** (app data), **HTTP API** + **Lambda** stub — deploy when ready (`Environment` = `dev` or `prod`). The Flutter app does not call this API yet.
+- **AWS**: CloudFormation at `[infrastructure/cloudformation/template.yaml](infrastructure/cloudformation/template.yaml)` creates **Cognito** (email + password), **DynamoDB**, **HTTP API** → **Lambda**. After the first deploy, upload the real API bundle (see below). **Settings → Account** uses **dart-define** for region, user pool, client id, and API URL; if those are unset, the app stays **local-only** (Open-Meteo still works).
+
+### Deploy / update the Lambda API bundle
+
+From the repo root:
+
+```bash
+chmod +x infrastructure/lambda/build.sh
+./infrastructure/lambda/build.sh
+aws lambda update-function-code \
+  --function-name "$(aws cloudformation describe-stacks --stack-name weather-history-dev --query 'Stacks[0].Outputs[?OutputKey==`ApiLambdaName`].OutputValue' --output text)" \
+  --zip-file fileb://infrastructure/lambda/api/function.zip
+```
+
+Re-deploy the stack if you change IAM or environment variables:
+
+```bash
+aws cloudformation deploy --template-file infrastructure/cloudformation/template.yaml \
+  --stack-name weather-history-dev --parameter-overrides Environment=dev \
+  --capabilities CAPABILITY_IAM
+```
+
+### Run Flutter against your stack (optional)
+
+Pass outputs from CloudFormation (pool id, client id, API URL without path suffix):
+
+```bash
+cd app
+flutter run -d chrome \
+  --dart-define=COGNITO_REGION=eu-west-1 \
+  --dart-define=COGNITO_USER_POOL_ID=eu-west-1_xxxxx \
+  --dart-define=COGNITO_CLIENT_ID=xxxxxxxx \
+  --dart-define=API_BASE_URL=https://xxxx.execute-api.eu-west-1.amazonaws.com
+```
+
+Use **Settings → Sign up** (confirm the email code), then **Sign in**, then **Pull from cloud** / **Push to cloud** as needed.
+
+**Linux desktop:** `flutter_secure_storage` may need `libsecret`; install your distro’s `libsecret` / `libsecret-1-0` package if token storage fails.
+
 - **No in-app rate limiting** for Open-Meteo — monitor usage; see [Pricing](https://open-meteo.com/en/pricing) if you need commercial or higher limits.
 
 ## Licence

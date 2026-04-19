@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/app_settings.dart';
 import '../state/app_state.dart';
+import '../widgets/account_section.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -17,6 +18,8 @@ class SettingsScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              const AccountSection(),
+              const SizedBox(height: 16),
               Text('Units', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               SwitchListTile(
