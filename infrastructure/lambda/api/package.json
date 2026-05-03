@@ -2,15 +2,20 @@
   "name": "weather-history-api",
   "private": true,
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.758.0",
     "@aws-sdk/client-dynamodb": "^3.758.0",
     "@aws-sdk/lib-dynamodb": "^3.758.0",
     "aws-jwt-verify": "^4.0.1"
   },
   "devDependencies": {
-    "esbuild": "^0.25.0"
+    "aws-sdk-client-mock": "^4.0.0",
+    "esbuild": "^0.25.0",
+    "esmock": "^2.6.7"
   },
   "scripts": {
-    "build": "esbuild index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.js --sourcemap",
-    "zip": "npm run build && cd dist && zip -q ../function.zip index.js"
+    "build": "esbuild index.mjs --bundle --platform=node --target=node22 --format=cjs --outfile=dist/index.js --sourcemap",
+    "zip": "npm run build && cd dist && zip -q ../function.zip index.js",
+    "test": "node --import=esmock --test __tests__/*.test.mjs",
+    "test:health": "RUN_HEALTH_CHECKS=1 node --test __tests__/health-check.test.mjs"
   }
 }

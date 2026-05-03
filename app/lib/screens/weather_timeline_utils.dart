@@ -1,38 +1,44 @@
-/// Default window: 15 calendar days ending **yesterday** (not including today).
-(DateTime start, DateTime end) pastFifteenDaysEndingYesterday() {
+/// Date range helpers for the Open-Meteo archive.
+///
+/// The archive end date must be no later than **yesterday** (local) — otherwise
+/// the API responds with HTTP 400.
+
+DateTime _yesterday() {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
-  final yesterday = today.subtract(const Duration(days: 1));
-  final start = yesterday.subtract(const Duration(days: 14));
-  return (start, yesterday);
+  return today.subtract(const Duration(days: 1));
 }
 
-/// Ideal calendar window: centre **±7** (15 calendar days inclusive).
-(DateTime start, DateTime end) fifteenDaysAround(DateTime centerDay) {
-  final d = DateTime(centerDay.year, centerDay.month, centerDay.day);
-  return (
-    d.subtract(const Duration(days: 7)),
-    d.add(const Duration(days: 7)),
-  );
-}
+DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-/// Same window as [fifteenDaysAround], but **clamped for Open-Meteo Archive**:
-/// the archive has no future days, so the end date must not be after **yesterday**
-/// (local calendar day). Otherwise the API returns HTTP 400.
-(DateTime start, DateTime end) fifteenDaysAroundArchive(
-  DateTime centerDay,
-) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final yesterday = today.subtract(const Duration(days: 1));
-  final d = DateTime(centerDay.year, centerDay.month, centerDay.day);
-  var start = d.subtract(const Duration(days: 7));
-  var end = d.add(const Duration(days: 7));
-  if (end.isAfter(yesterday)) {
-    end = yesterday;
-  }
-  if (start.isAfter(end)) {
-    start = end;
-  }
+/// Last [days] calendar days ending **yesterday** (today is excluded).
+///
+/// E.g. `pastDaysEndingYesterday(14)` returns 14 inclusive days.
+(DateTime start, DateTime end) pastDaysEndingYesterday(int days) {
+  assert(days > 0, 'days must be positive');
+  final end = _yesterday();
+  final start = end.subtract(Duration(days: days - 1));
   return (start, end);
+}
+
+/// Window of [days] calendar days **ending on [end]** (inclusive of [end]).
+///
+/// E.g. `pastDaysEndingOn(DateTime(2013,12,30), 14)` returns
+/// `2013-12-17 .. 2013-12-30`.
+(DateTime start, DateTime end) pastDaysEndingOn(DateTime end, int days) {
+  assert(days > 0, 'days must be positive');
+  final e = _dateOnly(end);
+  return (e.subtract(Duration(days: days - 1)), e);
+}
+
+/// Same as [pastDaysEndingOn] but clamps the end to **yesterday** if the user
+/// picked a date in the future (the Open-Meteo archive has no future days).
+(DateTime start, DateTime end) pastDaysEndingOnArchive(
+  DateTime end,
+  int days,
+) {
+  final yesterday = _yesterday();
+  var e = _dateOnly(end);
+  if (e.isAfter(yesterday)) e = yesterday;
+  return pastDaysEndingOn(e, days);
 }

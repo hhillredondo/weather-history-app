@@ -2,11 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather_history/main.dart';
+import 'package:weather_history/services/weather_repository.dart';
 import 'package:weather_history/state/app_state.dart';
 import 'package:weather_history/state/auth_state.dart';
 
 void main() {
-  testWidgets('shows home title in shell', (WidgetTester tester) async {
+  testWidgets('shows weather title on home', (WidgetTester tester) async {
     TestWidgetsFlutterBinding.ensureInitialized();
     SharedPreferences.setMockInitialValues({});
     await AppState.instance.load();
@@ -18,12 +19,15 @@ void main() {
         providers: [
           ChangeNotifierProvider<AppState>.value(value: AppState.instance),
           ChangeNotifierProvider<AuthState>.value(value: auth),
+          ProxyProvider<AuthState, WeatherRepository>(
+            update: (_, a, _) => WeatherRepository(a),
+          ),
         ],
         child: const WeatherHistoryApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(find.text('Past 15 days'), findsOneWidget);
+    expect(find.text('Historical Weather'), findsOneWidget);
   });
 }

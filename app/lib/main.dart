@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'screens/app_shell.dart';
+import 'screens/home_locations_screen.dart';
+import 'services/weather_repository.dart';
 import 'state/app_state.dart';
 import 'state/auth_state.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +17,9 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider<AppState>.value(value: AppState.instance),
         ChangeNotifierProvider<AuthState>.value(value: auth),
+        ProxyProvider<AuthState, WeatherRepository>(
+          update: (_, auth, _) => WeatherRepository(auth),
+        ),
       ],
       child: const WeatherHistoryApp(),
     ),
@@ -28,21 +33,10 @@ class WeatherHistoryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Weather History',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1565C0),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF90CAF9),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      home: const AppShell(),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
+      home: const HomeLocationsScreen(),
     );
   }
 }

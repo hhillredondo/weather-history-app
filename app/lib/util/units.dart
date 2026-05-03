@@ -39,3 +39,12 @@ String formatPrecipMm(double? mm, AppSettings s) {
     PrecipUnit.inch => '${mmToInch(mm).toStringAsFixed(2)} in',
   };
 }
+
+/// Plain-language band for a UV index value (WHO scale).
+String uvBand(double uv) {
+  if (uv < 3) return 'Low';
+  if (uv < 6) return 'Moderate';
+  if (uv < 8) return 'High';
+  if (uv < 11) return 'Very high';
+  return 'Extreme';
+}

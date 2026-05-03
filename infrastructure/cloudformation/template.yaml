@@ -13,6 +13,11 @@ Parameters:
     Type: String
     Description: CORS allow origin for HTTP API (e.g. https://app.example.com or * for dev only).
     Default: '*'
+  OpenMeteoApiKey:
+    Type: String
+    Description: Optional Open-Meteo customer API key (commercial/self-host). Leave empty for free public tier.
+    Default: ''
+    NoEcho: true
 
 Resources:
   UserPool:
@@ -30,6 +35,22 @@ Resources:
           RequireUppercase: false
           RequireNumbers: true
           RequireSymbols: false
+      EmailVerificationSubject: 'Historical Weather — confirm your email'
+      EmailVerificationMessage: |
+        Welcome to Historical Weather!
+
+        Your confirmation code is {####}.
+
+        Enter this code in the Historical Weather app to finish creating your account.
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailSubject: 'Historical Weather — confirm your email'
+        EmailMessage: |
+          Welcome to Historical Weather!
+
+          Your confirmation code is {####}.
+
+          Enter this code in the Historical Weather app to finish creating your account.
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
@@ -58,6 +79,9 @@ Resources:
           KeyType: HASH
         - AttributeName: sk
           KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
 
   ApiLambdaRole:
     Type: AWS::IAM::Role
@@ -84,20 +108,37 @@ Resources:
                   - dynamodb:DeleteItem
                   - dynamodb:Query
                 Resource: !GetAtt AppTable.Arn
+        - PolicyName: BedrockInvoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource:
+                  - 'arn:aws:bedrock:*::foundation-model/anthropic.*'
+                  - !Sub 'arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*'
+                  - !Sub 'arn:aws:bedrock:*:${AWS::AccountId}:application-inference-profile/*'
 
   ApiLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub '${ProjectName}-${Environment}-api'
-      Runtime: nodejs20.x
+      Runtime: nodejs22.x
       Handler: index.handler
       Role: !GetAtt ApiLambdaRole.Arn
+      Timeout: 90
+      MemorySize: 1024
       Environment:
         Variables:
           TABLE_NAME: !Ref AppTable
           ENVIRONMENT: !Ref Environment
           USER_POOL_ID: !Ref UserPool
           COGNITO_CLIENT_ID: !Ref UserPoolClient
+          OPEN_METEO_BASE_URL: https://archive-api.open-meteo.com/v1/archive
+          OPEN_METEO_API_KEY: !Ref OpenMeteoApiKey
+          BEDROCK_MODEL_ID: eu.anthropic.claude-haiku-4-5-20251001-v1:0
+          CHAT_DAILY_TOKEN_LIMIT: '200000'
       Code:
         ZipFile: |
           exports.handler = async () => ({

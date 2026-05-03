@@ -85,7 +85,12 @@ class AuthState extends ChangeNotifier {
   }
 
   /// Sub claim from ID token (JWT payload), if present.
-  String? get idTokenSub {
+  String? get idTokenSub => _idTokenClaim('sub');
+
+  /// Email claim from ID token (JWT payload), if present.
+  String? get email => _idTokenClaim('email');
+
+  String? _idTokenClaim(String key) {
     final id = _idToken;
     if (id == null) return null;
     try {
@@ -93,7 +98,7 @@ class AuthState extends ChangeNotifier {
       if (parts.length < 2) return null;
       final payload = utf8.decode(_decodeJwtBytes(parts[1]));
       final map = json.decode(payload) as Map<String, dynamic>;
-      return map['sub'] as String?;
+      return map[key] as String?;
     } catch (_) {
       return null;
     }
