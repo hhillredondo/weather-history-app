@@ -154,7 +154,7 @@ class _HomeLocationsScreenState extends State<HomeLocationsScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
                 itemCount: app.locations.length + 1,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, i) {
                   if (i == 0) {
                     return Padding(

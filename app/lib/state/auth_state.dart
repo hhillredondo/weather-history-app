@@ -21,7 +21,10 @@ class AuthState extends ChangeNotifier {
   String? _idToken;
 
   bool get isConfigured => AwsConfig.isConfigured;
-  bool get isSignedIn => _accessToken != null && _accessToken!.isNotEmpty;
+  bool get isSignedIn {
+    final t = _accessToken;
+    return t != null && t.isNotEmpty;
+  }
 
   String? get accessToken => _accessToken;
 
@@ -73,9 +76,10 @@ class AuthState extends ChangeNotifier {
 
   /// Refresh access token using refresh token; no-op if unavailable.
   Future<bool> refreshAccessToken() async {
-    if (_refreshToken == null || _refreshToken!.isEmpty) return false;
+    final refresh = _refreshToken;
+    if (refresh == null || refresh.isEmpty) return false;
     try {
-      final t = await _cognito.refresh(refreshToken: _refreshToken!);
+      final t = await _cognito.refresh(refreshToken: refresh);
       await _persistTokens(t);
       return true;
     } catch (_) {

@@ -120,7 +120,7 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                   ? _Hint(text: 'Type a place name and press search.')
                   : ListView.separated(
                       itemCount: _hits.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
                       itemBuilder: (context, i) {
                         final h = _hits[i];
                         return _HitTile(hit: h, onTap: () => _addHit(h));
@@ -145,9 +145,8 @@ class _HitTile extends StatelessWidget {
     final tokens = WeatherTokens.of(context);
     final theme = Theme.of(context);
     final subtitle = [
-      if (hit.admin1 != null && hit.admin1!.isNotEmpty) hit.admin1!,
-      if (hit.countryCode != null && hit.countryCode!.isNotEmpty)
-        hit.countryCode!,
+      if (hit.admin1 case final a? when a.isNotEmpty) a,
+      if (hit.countryCode case final c? when c.isNotEmpty) c,
     ].join(', ');
     return Material(
       color: tokens.pillSurface,

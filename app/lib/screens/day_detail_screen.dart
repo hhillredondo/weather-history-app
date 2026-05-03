@@ -94,7 +94,7 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
                 else
                   _HourlyList(rows: hourly, settings: settings),
                 const SizedBox(height: 16),
-                _Attribution(),
+                const _Attribution(),
               ],
             );
           },
@@ -336,6 +336,8 @@ class _ErrorTile extends StatelessWidget {
 }
 
 class _Attribution extends StatelessWidget {
+  const _Attribution();
+
   @override
   Widget build(BuildContext context) {
     final tokens = WeatherTokens.of(context);

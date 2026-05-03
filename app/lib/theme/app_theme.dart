@@ -9,7 +9,6 @@ class AppTheme {
   AppTheme._();
 
   static const Color _amber = Color(0xFFFFC23C);
-  static const Color _amberDeep = Color(0xFFE0A722);
   static const Color _darkBg = Color(0xFF0F1013);
   static const Color _darkSurface = Color(0xFF1B1C20);
   static const Color _darkSurfaceHigh = Color(0xFF24262B);

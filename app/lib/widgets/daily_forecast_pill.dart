@@ -58,10 +58,9 @@ class DailyForecastPill extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall,
                     ),
-                    if (day.uvIndexMax != null)
+                    if (day.uvIndexMax case final uv?)
                       Text(
-                        'UV ${day.uvIndexMax!.toStringAsFixed(1)} · '
-                        '${uvBand(day.uvIndexMax!)}',
+                        'UV ${uv.toStringAsFixed(1)} · ${uvBand(uv)}',
                         style: theme.textTheme.bodySmall,
                       ),
                   ],

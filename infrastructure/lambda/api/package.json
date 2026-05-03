@@ -15,7 +15,6 @@
   "scripts": {
     "build": "esbuild index.mjs --bundle --platform=node --target=node22 --format=cjs --outfile=dist/index.js --sourcemap",
     "zip": "npm run build && cd dist && zip -q ../function.zip index.js",
-    "test": "node --import=esmock --test __tests__/*.test.mjs",
-    "test:health": "RUN_HEALTH_CHECKS=1 node --test __tests__/health-check.test.mjs"
+    "test": "node --import=esmock --test __tests__/*.test.mjs"
   }
 }

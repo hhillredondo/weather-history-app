@@ -2,6 +2,7 @@
 ///
 /// The archive end date must be no later than **yesterday** (local) — otherwise
 /// the API responds with HTTP 400.
+library;
 
 DateTime _yesterday() {
   final now = DateTime.now();

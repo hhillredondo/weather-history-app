@@ -51,17 +51,14 @@ class DayStatsList extends StatelessWidget {
           icon: Icons.wb_twilight_rounded,
           iconColor: WeatherIconColors.sun,
           label: 'Sunrise · Sunset',
-          value: '${day.sunrise != null ? timeFmt.format(day.sunrise!) : '—'}'
-              ' · '
-              '${day.sunset != null ? timeFmt.format(day.sunset!) : '—'}',
+          value: _formatSunTimes(day.sunrise, day.sunset, timeFmt),
         ),
-      if (day.uvIndexMax != null)
+      if (day.uvIndexMax case final uv?)
         _StatRow(
           icon: Icons.wb_sunny_rounded,
           iconColor: WeatherIconColors.sun,
           label: 'UV index',
-          value: '${day.uvIndexMax!.toStringAsFixed(1)} · '
-              '${uvBand(day.uvIndexMax!)}',
+          value: '${uv.toStringAsFixed(1)} · ${uvBand(uv)}',
         ),
       if (humidity != null)
         _StatRow(
@@ -94,6 +91,16 @@ class DayStatsList extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static String _formatSunTimes(
+    DateTime? sunrise,
+    DateTime? sunset,
+    DateFormat fmt,
+  ) {
+    final r = sunrise == null ? '—' : fmt.format(sunrise);
+    final s = sunset == null ? '—' : fmt.format(sunset);
+    return '$r · $s';
   }
 
   static int? _averageHumidity(List<HourlyWeatherRow>? hourly) {

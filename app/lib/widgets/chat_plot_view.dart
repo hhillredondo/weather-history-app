@@ -24,10 +24,10 @@ class ChatPlotView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(plot.title, style: theme.textTheme.titleMedium),
-          if (plot.yLabel != null && plot.yLabel!.isNotEmpty) ...[
+          if (plot.yLabel case final yLabel? when yLabel.isNotEmpty) ...[
             const SizedBox(height: 2),
             Text(
-              plot.yLabel!,
+              yLabel,
               style: theme.textTheme.bodySmall?.copyWith(color: tokens.mutedText),
             ),
           ],

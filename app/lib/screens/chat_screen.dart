@@ -107,7 +107,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       controller: _scroll,
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                       itemCount: _messages.length + (_sending ? 1 : 0),
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
                       itemBuilder: (context, i) {
                         if (i >= _messages.length) {
                           return const _Thinking();
