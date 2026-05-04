@@ -3,7 +3,7 @@ name: Nightly
 on:
   schedule:
     # 02:00 UTC every day. GitHub may delay scheduled runs by a few minutes
-    # depending on runner availability — this is fine for nightly builds.
+    # depending on runner availability — this is fine for nightly tests.
     - cron: '0 2 * * *'
   workflow_dispatch:
 
@@ -47,56 +47,3 @@ jobs:
       - name: Lambda tests
         working-directory: infrastructure/lambda/api
         run: npm test
-
-  build-android:
-    needs: test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Restore signing keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/keystore.jks"
-          cat > android/key.properties <<EOF
-          storePassword=$STORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=upload
-          storeFile=$RUNNER_TEMP/keystore.jks
-          EOF
-
-      - name: Resolve Flutter packages
-        run: flutter pub get
-
-      - name: Build release APK
-        # Build number = monotonically increasing GitHub run number, so each
-        # nightly is treated as an upgrade by Android (not a downgrade).
-        run: flutter build apk --release --build-number=${{ github.run_number }}
-
-      - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-          groups: nightlies
-          file: app/build/app/outputs/flutter-apk/app-release.apk
-          releaseNotes: |
-            Nightly build
-            Commit: ${{ github.sha }}
-            Run: ${{ github.run_number }}
