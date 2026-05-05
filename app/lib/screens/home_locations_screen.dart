@@ -152,30 +152,11 @@ class _HomeLocationsScreenState extends State<HomeLocationsScreen> {
             ? const _EmptyHome()
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                itemCount: app.locations.length + 1,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                itemCount: app.locations.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, i) {
-                  if (i == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.bookmark_rounded,
-                            size: 18,
-                            color: WeatherTokens.of(context).mutedText,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Saved locations',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  final loc = app.locations[i - 1];
+                  final loc = app.locations[i];
                   final future = _summaries[loc.id];
                   return FutureBuilder<DailyWeather?>(
                     future: future,

@@ -82,6 +82,33 @@ class _LocationWeatherScreenState extends State<LocationWeatherScreen> {
     });
   }
 
+  Future<void> _confirmRemove() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Remove location?'),
+        content: Text(
+          'Remove ${widget.location.name} from your saved places? '
+          'This only removes it from this app — the data stays in the archive.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await context.read<AppState>().removeLocation(widget.location.id);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
   void _openDay(DailyWeather day) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -107,6 +134,11 @@ class _LocationWeatherScreenState extends State<LocationWeatherScreen> {
             tooltip: 'Pick a day',
             onPressed: _pickDay,
             icon: const Icon(Icons.calendar_month_rounded),
+          ),
+          IconButton(
+            tooltip: 'Remove location',
+            onPressed: _confirmRemove,
+            icon: const Icon(Icons.delete_outline_rounded),
           ),
         ],
       ),

@@ -93,44 +93,83 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final auth = context.watch<AuthState>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ask the archive'),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: _messages.isEmpty
-                  ? const _EmptyChat()
-                  : ListView.separated(
-                      controller: _scroll,
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                      itemCount: _messages.length + (_sending ? 1 : 0),
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, i) {
-                        if (i >= _messages.length) {
-                          return const _Thinking();
-                        }
-                        return _MessageBubble(message: _messages[i]);
-                      },
+        child: !auth.isSignedIn
+            ? const _SignInPrompt()
+            : Column(
+                children: [
+                  Expanded(
+                    child: _messages.isEmpty
+                        ? const _EmptyChat()
+                        : ListView.separated(
+                            controller: _scroll,
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            itemCount: _messages.length + (_sending ? 1 : 0),
+                            separatorBuilder: (_, _) => const SizedBox(height: 12),
+                            itemBuilder: (context, i) {
+                              if (i >= _messages.length) {
+                                return const _Thinking();
+                              }
+                              return _MessageBubble(message: _messages[i]);
+                            },
+                          ),
+                  ),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                      child: Text(
+                        _error!,
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                      ),
                     ),
-            ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                child: Text(
-                  _error!,
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
-                ),
+                  _Composer(
+                    controller: _controller,
+                    onSend: _send,
+                    sending: _sending,
+                  ),
+                ],
               ),
-            _Composer(
-              controller: _controller,
-              onSend: _send,
-              sending: _sending,
-            ),
-          ],
-        ),
+      ),
+    );
+  }
+}
+
+class _SignInPrompt extends StatelessWidget {
+  const _SignInPrompt();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = WeatherTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 80, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Icon(
+            Icons.lock_outline_rounded,
+            size: 56,
+            color: tokens.mutedText,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Sign in to chat',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'The chat assistant needs an account so usage stays attributable. '
+            'Open Settings (top-right of home) to sign in or create an account.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: tokens.mutedText),
+          ),
+        ],
       ),
     );
   }
@@ -316,7 +355,7 @@ class _Composer extends StatelessWidget {
         color: tokens.pillSurface,
         borderRadius: const BorderRadius.all(Radius.circular(28)),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -330,11 +369,13 @@ class _Composer extends StatelessWidget {
                   decoration: const InputDecoration(
                     hintText: 'Ask about historical weather…',
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                   ),
                   onSubmitted: (_) => onSend(),
                 ),
               ),
+              const SizedBox(width: 6),
               _SendButton(onSend: onSend, sending: sending),
             ],
           ),
@@ -356,31 +397,28 @@ class _SendButton extends StatelessWidget {
     final enabled = !sending;
     final bg = enabled ? tokens.accent : tokens.pillSurfaceHigh;
     final fg = enabled ? const Color(0xFF1B1300) : tokens.mutedText;
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 2),
-      child: Material(
-        color: bg,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(14)),
-        ),
-        child: InkWell(
-          onTap: enabled ? onSend : null,
-          borderRadius: const BorderRadius.all(Radius.circular(14)),
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: Center(
-              child: sending
-                  ? SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: fg,
-                      ),
-                    )
-                  : Icon(Icons.arrow_upward_rounded, size: 20, color: fg),
-            ),
+    return Material(
+      color: bg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
+      child: InkWell(
+        onTap: enabled ? onSend : null,
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Center(
+            child: sending
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: fg,
+                    ),
+                  )
+                : Icon(Icons.arrow_upward_rounded, size: 20, color: fg),
           ),
         ),
       ),
