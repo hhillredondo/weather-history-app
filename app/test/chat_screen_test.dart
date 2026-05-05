@@ -7,11 +7,19 @@ import 'package:weather_history/state/app_state.dart';
 import 'package:weather_history/state/auth_state.dart';
 import 'package:weather_history/theme/app_theme.dart';
 
-Future<void> _pumpChat(WidgetTester tester) async {
+class _FakeAuth extends AuthState {
+  _FakeAuth({required bool signedIn}) : _signedIn = signedIn;
+  final bool _signedIn;
+  @override
+  bool get isSignedIn => _signedIn;
+  @override
+  Future<void> load() async {}
+}
+
+Future<void> _pumpChat(WidgetTester tester, {required bool signedIn}) async {
   SharedPreferences.setMockInitialValues({});
   await AppState.instance.load();
-  final auth = AuthState();
-  await auth.load();
+  final auth = _FakeAuth(signedIn: signedIn);
 
   await tester.pumpWidget(
     MultiProvider(
@@ -29,8 +37,9 @@ Future<void> _pumpChat(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('empty state renders header and example prompts', (tester) async {
-    await _pumpChat(tester);
+  testWidgets('empty state renders header and example prompts when signed-in',
+      (tester) async {
+    await _pumpChat(tester, signedIn: true);
 
     expect(find.text('Ask the archive'), findsWidgets);
     expect(
@@ -43,8 +52,9 @@ void main() {
     );
   });
 
-  testWidgets('composer is present with the prompt hint', (tester) async {
-    await _pumpChat(tester);
+  testWidgets('composer is present with the prompt hint when signed-in',
+      (tester) async {
+    await _pumpChat(tester, signedIn: true);
 
     expect(find.byType(TextField), findsOneWidget);
     expect(
@@ -54,17 +64,13 @@ void main() {
   });
 
   testWidgets(
-    'tapping send while signed-out surfaces an error',
+    'signed-out users see the sign-in prompt and no composer',
     (tester) async {
-      await _pumpChat(tester);
+      await _pumpChat(tester, signedIn: false);
 
-      await tester.enterText(find.byType(TextField), 'hello');
-      await tester.pump();
-      // Use the composer's icon button.
-      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
-      await tester.pump();
-
-      expect(find.textContaining('Sign in'), findsOneWidget);
+      expect(find.text('Sign in to chat'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.byIcon(Icons.arrow_upward_rounded), findsNothing);
     },
   );
 }

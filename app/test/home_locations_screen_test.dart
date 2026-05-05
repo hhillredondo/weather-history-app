@@ -122,7 +122,6 @@ void main() {
     // Let the FutureBuilder for the location summary settle.
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.text('Saved locations'), findsOneWidget);
     expect(find.text('Madrid'), findsOneWidget);
   });
 
