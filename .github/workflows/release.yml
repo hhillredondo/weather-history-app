@@ -87,7 +87,21 @@ jobs:
       - name: Build release APK
         # Build number = monotonically increasing GitHub run number, so each
         # release is treated as an upgrade by Android (not a downgrade).
-        run: flutter build apk --release --build-number=${{ github.run_number }}
+        # Cognito + API URL are injected via --dart-define so the release APK
+        # can talk to the backend (debug builds get the same values from
+        # local .env / launch config).
+        env:
+          COGNITO_REGION: ${{ secrets.COGNITO_REGION }}
+          COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+          COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          flutter build apk --release \
+            --build-number=${{ github.run_number }} \
+            --dart-define=COGNITO_REGION="$COGNITO_REGION" \
+            --dart-define=COGNITO_USER_POOL_ID="$COGNITO_USER_POOL_ID" \
+            --dart-define=COGNITO_CLIENT_ID="$COGNITO_CLIENT_ID" \
+            --dart-define=API_BASE_URL="$API_BASE_URL"
 
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
