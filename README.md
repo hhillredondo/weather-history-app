@@ -65,7 +65,8 @@ Re-deploy the stack if you change IAM or environment variables:
 ```bash
 aws cloudformation deploy --template-file infrastructure/cloudformation/template.yaml \
   --stack-name weather-history-dev --parameter-overrides Environment=dev \
-  --capabilities CAPABILITY_IAM
+  --capabilities CAPABILITY_IAM \
+  --tags Project=weather-history-app
 ```
 
 ### Run Flutter against your stack (optional)
