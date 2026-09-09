@@ -135,6 +135,9 @@ Resources:
           ENVIRONMENT: !Ref Environment
           USER_POOL_ID: !Ref UserPool
           COGNITO_CLIENT_ID: !Ref UserPoolClient
+          # Checked by the handler before echoing an Origin back, so a hostile
+          # site cannot have its own origin reflected in the CORS headers.
+          ALLOWED_ORIGINS: !Ref AllowedOrigins
           OPEN_METEO_BASE_URL: https://archive-api.open-meteo.com/v1/archive
           OPEN_METEO_API_KEY: !Ref OpenMeteoApiKey
           BEDROCK_MODEL_ID: eu.anthropic.claude-haiku-4-5-20251001-v1:0

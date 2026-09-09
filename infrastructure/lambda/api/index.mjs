@@ -53,6 +53,20 @@ function getVerifier() {
   return verifier;
 }
 
+// Origins permitted to receive CORS headers. A mobile/desktop client sends no
+// Origin at all, so an absent header is fine; what is not fine is reflecting an
+// arbitrary attacker-supplied Origin straight back.
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+function resolveOrigin(requestOrigin) {
+  if (!requestOrigin) return ALLOWED_ORIGINS[0] || "*";
+  if (ALLOWED_ORIGINS.length === 0) return "*"; // unconfigured: preserve old behaviour
+  return ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : ALLOWED_ORIGINS[0];
+}
+
 function corsHeaders(origin) {
   return {
     "content-type": "application/json",
@@ -742,10 +756,7 @@ async function handleChat(origin, sub, body) {
 // ---------------------------------------------------------------------------
 
 export async function handler(event) {
-  const origin =
-    event.headers?.origin ||
-    event.headers?.Origin ||
-    "*";
+  const origin = resolveOrigin(event.headers?.origin || event.headers?.Origin);
 
   const method = event.requestContext?.http?.method || "GET";
   const rawPath = event.rawPath || "/";
