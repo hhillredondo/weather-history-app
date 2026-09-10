@@ -28,3 +28,7 @@ infrastructure/lambda/api/function.zip
 
 # Dart tooling cache: clones of external repos, not our source.
 app/.dart_skills/repos/
+
+SKILL.md
+flutter-rules.md
+skills_config.json
