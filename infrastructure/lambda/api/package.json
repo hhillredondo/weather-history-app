@@ -2,7 +2,7 @@
   "name": "weather-history-api",
   "private": true,
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.758.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.1127.0",
     "@aws-sdk/client-dynamodb": "^3.758.0",
     "@aws-sdk/lib-dynamodb": "^3.758.0",
     "aws-jwt-verify": "^4.0.1"
