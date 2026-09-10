@@ -1,7 +1,5 @@
-# Local Flutter SDK (optional checkout for CI/dev without system Flutter)
 .flutter-sdk/
 
-# Dart / Flutter
 **/doc/api/
 **/ios/.symlinks/
 **/ios/Flutter/Flutter.framework
@@ -15,20 +13,23 @@
 **/.dart_tool/
 **/.packages
 
-# IDE
 .idea/
 *.iml
 *.swp
 .DS_Store
 
-# Lambda bundle (build locally)
 infrastructure/lambda/api/node_modules/
 infrastructure/lambda/api/dist/
 infrastructure/lambda/api/function.zip
 
-# Dart tooling cache: clones of external repos, not our source.
 app/.dart_skills/repos/
 
-SKILL.md
+# AI assistant context and tooling, kept local
+.claude/
+CLAUDE.md
+AGENTS.md
+.cursor/
+.cursorrules
+.aider*
+.dart_skills/
 flutter-rules.md
-skills_config.json
